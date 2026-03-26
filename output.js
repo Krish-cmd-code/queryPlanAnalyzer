@@ -55,6 +55,68 @@ function drawTree(data) {
 
   nodes.append("text")
     .text(d => d.data.type)
+    // .text(d=> `Cost:${d.data.cost}\nRows: ${d.data.rows}`)
     .attr("x", 10)
-    .attr("y", 3);
+    .attr("y", 3)
+    .attr("fill", d => d.data.cost > 100 ? "red" : "green");
+
+  nodes.append("title").text(d=> `Cost:${d.data.cost}\nRows: ${d.data.rows}`);
+
+    svg.call(d3.zoom().on("zoom", (event) => {
+    g.attr("transform", event.transform);
+    }));
+
+    // nodes.on("click", function(event, d) {
+    // showDetails(d.data);  
+    // });
+
+    nodes.on("click", function(event, d) {
+    // reset all nodes
+    d3.selectAll("circle").attr("stroke", "none");
+
+    // highlight clicked node
+    d3.select(this).select("circle")
+        .attr("stroke", "black")
+        .attr("stroke-width", 2);
+
+    showDetails(d.data);
+    });
+
+}
+
+
+function showDetails(data) {
+  const panel = document.getElementById("detailsContent");
+
+  panel.innerHTML = `
+    <p><strong>Type:</strong> ${data.type}</p>
+    <p><strong>Table:</strong> ${data.relationName || "N/A"}</p>
+    <p><strong>Cost:</strong> ${data.cost}</p>
+    <p><strong>Actual Rows:</strong> ${data.actualRows || "N/A"}</p>
+    <p><strong>Time:</strong> ${data.time || "N/A"} ms</p>
+    <p><strong>Filter:</strong> ${data.filter || "None"}</p>
+    <p><strong>Loops:</strong> ${data.loops || 1}</p>
+  `;
+
+  const insights = getInsights(data);
+
+    panel.innerHTML += `
+    <h4>Insights</h4>
+    ${insights.map(i => `<p>${i}</p>`).join("")}
+    `;
+}
+
+
+function getInsights(data) {
+  let insights = [];
+
+  if (data.type === "Seq Scan") {
+    insights.push("⚠️ Full table scan → consider index");
+  }
+
+  if (data.actualRows > 1000) {
+    insights.push("⚠️ Large data processing");
+  }
+
+  return insights;
 }

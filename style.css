@@ -1,0 +1,12 @@
+#tree{
+    border: 3px solid black;
+}
+
+#details {
+  background: #f9f9f9;
+  font-family: Arial;
+}
+
+#detailsContent p {
+  margin: 8px 0;
+}

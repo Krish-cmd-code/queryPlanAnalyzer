@@ -24,8 +24,11 @@ function parsePlan(node){
     return {
         type:node["Node Type"],
         cost:node["Total Cost"],
-        rows:node["Actual Rows"],
-        loops:node["Actual loops"],
+        actualRows:node["Actual Rows"],
+        loops:node["Actual Loops"],
+        relationName:node["Relation Name"],
+        Filter:node["Filter"],
+
         children:node.Plans?node.Plans.map(parsePlan):[]
     }
 }
