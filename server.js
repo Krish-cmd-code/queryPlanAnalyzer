@@ -68,6 +68,7 @@ app.post('/analyze',async (req,res)=>{
             VALUES($1, $2)`,
             [query, rawPlan]
         );
+        
         res.json(parsed);
 
         
@@ -80,14 +81,29 @@ app.post('/analyze',async (req,res)=>{
 
 
 app.get("/history", async (req, res) => {
+//   const result = await pool.query(`
+//     SELECT id,
+//            query_text,
+//            created_at
+//     FROM query_history
+//     ORDER BY created_at DESC
+//     LIMIT 10
+//   `);
+
   const result = await pool.query(`
-    SELECT id,
-           query_text,
-           created_at
-    FROM query_history
+    SELECT *
+    FROM (
+        SELECT DISTINCT ON (query_text)
+            id,
+            query_text,
+            created_at
+        FROM query_history
+        ORDER BY query_text, created_at DESC
+    ) AS recent
     ORDER BY created_at DESC
-    LIMIT 10
+    LIMIT 10;
   `);
+
 
   res.json(result.rows);
 });

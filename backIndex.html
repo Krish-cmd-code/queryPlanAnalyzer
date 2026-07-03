@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Plan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="historyPanel">
+    <h3>Recent Queries</h3>
+    <ul id="queryList"></ul>
+    </div>
+    <label for="query">enter query</label>
+    <textarea id="query" placeholder="enter" rows="10" cols="40">
+    </textarea>
+
+    <button onclick="analyze()">Analyze</button>
+    
+    <div style="display: flex; height: 100vh;">
+
+    <!-- Tree Area -->
+    <div id="tree" style="flex: 2; border-right: 1px solid #ccc;"></div>
+
+    <!-- Side Panel -->
+    <div id="details" style="flex: 1; padding: 15px;">
+        <h3>Node Details</h3>
+        <div id="detailsContent">Click a node</div>
+    </div>
+
+    </div>
+    <pre id="output"></pre>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="output.js"></script>
+</body>
+</html>

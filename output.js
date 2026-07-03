@@ -56,7 +56,7 @@ async function analyze() {
             console.log(data);
             document.getElementById("output").textContent=JSON.stringify(data,null,2);
             drawTree(data); //send to D3
-
+            document.getElementById("detailsContent").innerHTML="Click a node to view details.";
             await loadHistory();
 }
 
@@ -162,9 +162,49 @@ function getInsights(data) {
     insights.push("⚠️ Full table scan → consider index");
   }
 
-  if (data.actualRows > 1000) {
-    insights.push("⚠️ Large data processing");
+  // Index Scan
+  if (data.type === "Index Scan") {
+        insights.push("✅ Index Scan detected. An index is being used efficiently.");
   }
+
+  // Nested Loop
+  if (data.type === "Nested Loop") {
+        insights.push("⚠ Nested Loop detected. Can become expensive for large datasets.");
+  }
+
+  // Hash Join
+    if (data.type === "Hash Join") {
+        insights.push("✅ Hash Join is efficient for large unsorted datasets.");
+    }
+
+    // Merge Join
+    if (data.type === "Merge Join") {
+        insights.push("✅ Merge Join performs well when both inputs are sorted.");
+    }
+
+    // Aggregate
+    if (data.type.includes("Aggregate")) {
+        insights.push("ℹ Aggregation operation detected.");
+    }
+
+  if (data.actualRows > 1000) {
+    insights.push("⚠️ Large data processing (>1000 rows)");
+  }
+
+  // High cost
+    if (data.cost > 1000) {
+        insights.push("🔥 High execution cost. This operation deserves attention.");
+    }
+
+
+
+    // Multiple loops
+    if (data.loops > 1) {
+        insights.push(`⚠ Operation executed ${data.loops} times.`);
+    }
+
+    
+
 
   return insights;
 }
