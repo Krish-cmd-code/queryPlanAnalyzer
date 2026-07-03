@@ -1,3 +1,49 @@
+window.onload = loadHistory;
+
+async function loadHistory() {
+
+  const response = await fetch(
+    "http://localhost:8000/history"
+  );
+
+  const queries = await response.json();
+
+  const list = document.getElementById("queryList");
+
+  list.innerHTML = "";
+
+  queries.forEach(q => {
+
+    const li = document.createElement("li");
+
+    li.textContent =
+      q.query_text.substring(0, 50);
+
+    li.onclick = () => loadQuery(q.id);
+
+    list.appendChild(li);
+
+  });
+}
+
+async function loadQuery(id) {
+
+  const response = await fetch(
+    `http://localhost:8000/history/${id}`
+  );
+
+  const data = await response.json();
+
+  // fill textarea
+  document.getElementById("query").value =
+    data.query_text;
+
+  // render plan
+  drawTree(data.plan_json);
+
+}
+
+
 async function analyze() {
             const query=document.getElementById("query").value;
             const res = await fetch("http://localhost:8000/analyze",{
@@ -7,9 +53,11 @@ async function analyze() {
             });
 
             const data= await res.json();
+            console.log(data);
             document.getElementById("output").textContent=JSON.stringify(data,null,2);
-
             drawTree(data); //send to D3
+
+            await loadHistory();
 }
 
 function drawTree(data) {

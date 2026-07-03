@@ -7,8 +7,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="historyPanel">
+    <h3>Recent Queries</h3>
+    <ul id="queryList"></ul>
+    </div>
     <label for="query">enter query</label>
-    <textarea id="query" placeholder="enter">
+    <textarea id="query" placeholder="enter" rows="10" cols="40">
     </textarea>
 
     <button onclick="analyze()">Analyze</button>

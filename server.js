@@ -62,10 +62,46 @@ app.post('/analyze',async (req,res)=>{
         // res.json(result.rows[0]["QUERY PLAN"][0]);
         const rawPlan=result.rows[0]["QUERY PLAN"][0];
         const parsed = parsePlan(rawPlan.Plan);
+
+        await pool.query(
+            `INSERT INTO query_history(query_text, plan_json)
+            VALUES($1, $2)`,
+            [query, rawPlan]
+        );
         res.json(parsed);
+
+        
+        
     }catch(err){
         res.status(500).json({error: err.message});
     }
+});
+
+
+
+app.get("/history", async (req, res) => {
+  const result = await pool.query(`
+    SELECT id,
+           query_text,
+           created_at
+    FROM query_history
+    ORDER BY created_at DESC
+    LIMIT 10
+  `);
+
+  res.json(result.rows);
+});
+
+
+app.get("/history/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const result = await pool.query(
+    `SELECT * FROM query_history WHERE id = $1`,
+    [id]
+  );
+
+  res.json(result.rows[0]);
 });
 
 app.listen(port,()=>{
