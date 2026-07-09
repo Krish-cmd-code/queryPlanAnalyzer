@@ -46,12 +46,13 @@ async function loadQuery(id) {
 
 async function analyze() {
             const query=document.getElementById("query").value;
+            console.log(`analyzing query`);
             const res = await fetch("http://localhost:8000/analyze",{
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
                 body: JSON.stringify({query})
             });
-
+            
             const data= await res.json();
             console.log(data);
             document.getElementById("output").textContent=JSON.stringify(data,null,2);
@@ -60,78 +61,180 @@ async function analyze() {
             await loadHistory();
 }
 
+//function drawTree(data) {
+//   d3.select("#tree").html(""); // clear old
+
+//   const width = 800;
+//   const height = 500;
+
+//   const svg = d3.select("#tree")
+//     .append("svg")
+//     .attr("width", width)
+//     .attr("height", height);
+
+//   const g = svg.append("g").attr("transform", "translate(50,50)");
+
+//   // Convert data to hierarchy
+//   const root = d3.hierarchy(data, d => d.children);
+
+//   const treeLayout = d3.tree().size([height - 100, width - 200]);
+//   treeLayout(root);
+
+//   // Draw links
+//   g.selectAll(".link")
+//     .data(root.links())
+//     .enter()
+//     .append("line")
+//     .attr("x1", d => d.source.y)
+//     .attr("y1", d => d.source.x)
+//     .attr("x2", d => d.target.y)
+//     .attr("y2", d => d.target.x)
+//     .attr("stroke", "#999");
+
+//   // Draw nodes
+//   const nodes = g.selectAll(".node")
+//     .data(root.descendants())
+//     .enter()
+//     .append("g")
+//     .attr("transform", d => `translate(${d.y},${d.x})`);
+
+//   nodes.append("circle")
+//     .attr("r", 6)
+//     .attr("fill", "steelblue");
+
+//   nodes.append("text")
+//     .text(d => d.data.type)
+//     // .text(d=> `Cost:${d.data.cost}\nRows: ${d.data.rows}`)
+//     .attr("x", 10)
+//     .attr("y", 3)
+//     .attr("fill", d => d.data.cost > 100 ? "red" : "green");
+
+//   nodes.append("title").text(d=> `Cost:${d.data.cost}\nRows: ${d.data.rows}`);
+
+//     svg.call(d3.zoom().on("zoom", (event) => {
+//     g.attr("transform", event.transform);
+//     }));
+
+//     // nodes.on("click", function(event, d) {
+//     // showDetails(d.data);  
+//     // });
+
+//     nodes.on("click", function(event, d) {
+//     // reset all nodes
+//     d3.selectAll("circle").attr("stroke", "none");
+
+//     // highlight clicked node
+//     d3.select(this).select("circle")
+//         .attr("stroke", "black")
+//         .attr("stroke-width", 2);
+
+//     showDetails(d.data);
+//     });
+
+// }
+
+
 function drawTree(data) {
-  d3.select("#tree").html(""); // clear old
 
-  const width = 800;
-  const height = 500;
+    // Clear previous tree
+    d3.select("#tree").html("");
+    console.log(`drawing tree:`);
 
-  const svg = d3.select("#tree")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
+    const width = 800;
+    const height = 500;
 
-  const g = svg.append("g").attr("transform", "translate(50,50)");
+    const svg = d3.select("#tree")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
 
-  // Convert data to hierarchy
-  const root = d3.hierarchy(data, d => d.children);
+    const g = svg.append("g")
+        .attr("transform", "translate(50,50)");
 
-  const treeLayout = d3.tree().size([height - 100, width - 200]);
-  treeLayout(root);
+    // Convert JSON into hierarchy
+    const root = d3.hierarchy(data, d => d.children);
 
-  // Draw links
-  g.selectAll(".link")
-    .data(root.links())
-    .enter()
-    .append("line")
-    .attr("x1", d => d.source.y)
-    .attr("y1", d => d.source.x)
-    .attr("x2", d => d.target.y)
-    .attr("y2", d => d.target.x)
-    .attr("stroke", "#999");
+    // Compute layout
+    const treeLayout = d3.tree()
+        .size([height - 100, width - 250]);
 
-  // Draw nodes
-  const nodes = g.selectAll(".node")
-    .data(root.descendants())
-    .enter()
-    .append("g")
-    .attr("transform", d => `translate(${d.y},${d.x})`);
+    treeLayout(root);
 
-  nodes.append("circle")
-    .attr("r", 6)
-    .attr("fill", "steelblue");
+    // Helper function to mirror horizontally
+    function getX(node) {
+        return width - 150 - node.y;
+    }
 
-  nodes.append("text")
-    .text(d => d.data.type)
-    // .text(d=> `Cost:${d.data.cost}\nRows: ${d.data.rows}`)
-    .attr("x", 10)
-    .attr("y", 3)
-    .attr("fill", d => d.data.cost > 100 ? "red" : "green");
-
-  nodes.append("title").text(d=> `Cost:${d.data.cost}\nRows: ${d.data.rows}`);
-
-    svg.call(d3.zoom().on("zoom", (event) => {
-    g.attr("transform", event.transform);
-    }));
-
-    // nodes.on("click", function(event, d) {
-    // showDetails(d.data);  
-    // });
-
-    nodes.on("click", function(event, d) {
-    // reset all nodes
-    d3.selectAll("circle").attr("stroke", "none");
-
-    // highlight clicked node
-    d3.select(this).select("circle")
-        .attr("stroke", "black")
+    // Draw links
+    g.selectAll(".link")
+        .data(root.links())
+        .enter()
+        .append("line")
+        .attr("class", "link")
+        .attr("x1", d => getX(d.source))
+        .attr("y1", d => d.source.x)
+        .attr("x2", d => getX(d.target))
+        .attr("y2", d => d.target.x)
+        .attr("stroke", "#999")
         .attr("stroke-width", 2);
 
-    showDetails(d.data);
+    // Draw nodes
+    const nodes = g.selectAll(".node")
+        .data(root.descendants())
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${getX(d)},${d.x})`);
+
+    // Circle
+    nodes.append("circle")
+        .attr("r", 7)
+        .attr("fill", "steelblue");
+
+    // Node label (placed to the LEFT of node)
+    nodes.append("text")
+        .text(d =>{
+          if(d.data.relationName){
+             return d.data.relationName;
+             console.log(`table name gets added`);
+          }else{
+             return d.data.type;
+             console.log(`type gets added`);
+          }
+          })
+        .attr("x", -10)
+        .attr("y", 4)
+        .attr("text-anchor", "end")
+        .attr("fill", d => d.data.cost > 100 ? "red" : "green");
+
+    // Tooltip
+    nodes.append("title")
+        .text(d =>
+            `Cost: ${d.data.cost}\nRows: ${d.data.rows}`
+        );
+
+    // Zoom
+    svg.call(
+        d3.zoom().on("zoom", function(event) {
+            g.attr("transform", event.transform);
+        })
+    );
+
+    // Node click
+    nodes.on("click", function(event, d) {
+
+        d3.selectAll("circle")
+            .attr("stroke", "none");
+
+        d3.select(this)
+            .select("circle")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2);
+
+        showDetails(d.data);
     });
 
 }
-
 
 function showDetails(data) {
   const panel = document.getElementById("detailsContent");
