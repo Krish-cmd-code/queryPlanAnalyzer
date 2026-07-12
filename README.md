@@ -9,7 +9,7 @@
 
 ### Steps to Run the tool:
  
- - first run the server using command: $npm run dev
+ - first run the server using command: $ node server.js
  - then go live using index.html file on Visual Studio Code IDE.
 
 
