@@ -5,6 +5,7 @@
  ### setup/technologies rquired for project:
   - install node.js on local machine
   - install postgreSql on local machine
+  - you can setup database configuration setup using Pool() in server.js
   - required internet for accessing d3.js library.
 
 ### Steps to Run the tool:
